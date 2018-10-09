@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>XpertViewerClient_V3</title>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous"> -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet" />
+    <style type="text/css">
+        body {
+            margin: 0px;
+        }
+
+        /*-----------SWITCH-----------*/
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide default HTML checkbox */
+
+        .switch input {
+            display: none;
+        }
+
+        /* The slider */
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /*----------------------------------*/
+
+        .peerVideo {
+            height: 200px;
+            width: 335px;
+            position: absolute;
+            top: 0px;
+            left: 650px;
+            opacity: 0.7;
+            /*border-style: solid;
+      border-width: 1px;*/
+            5
+        }
+
+        .peerVideo:hover {
+            border-style: solid;
+            border-width: 2px;
+            border-color: skyblue;
+        }
+
+        .userVideo {
+            height: 410px;
+            width: 970px;
+            float: left;
+            left: 0px;
+            position: absolute;
+            top: 0px;
+            z-index: -1;
+        }
+
+        .input-group {
+            width: 120px;
+            position: absolute;
+            left: 0px;
+            top: 5px;
+            opacity: 0.8;
+        }
+
+        .sw_capture {
+            position: absolute;
+            top: 205px;
+            left: 910px;
+        }
+
+        #dataChannelReceive {
+            resize: none;
+            width: 730px;
+            height: 94px;
+            opacity: 0.7;
+            position: absolute;
+            left: 120px;
+            top: 317px;
+        }
+
+        #call-state {
+            width: 120px;
+            position: absolute;
+            left: 0px;
+            top: 34px;
+            opacity: 0.8;
+        }
+    </style>
+    <!-- CSS -->
+
+
+</head>
+
+<body style="overflow: hidden">
+    <div class="col-md-1">
+        <video class='userVideo' id="videoInput" autoplay width="640px" height="480px" poster="./img/CamOff.png"></video>
+        <br><br><br><br><br>
+        <video class='peerVideo' id="videoOutput" autoplay width="200px" height="120px" onclick="rtc.videoswitch()" controls></video>
+        <textarea class="form-control" id="dataChannelReceive" readonly></textarea><br>
+    </div>
+    <div class='reg'>
+        <span class="label label-primary pull-right" id="call-state"></span>
+        <div class='input-group' id='inputgroup'>
+            <input type="text" class="form-control input-sm" name="id" id="id" maxlength=5 size=5 placeholder="ID" autofocus/>
+            <div class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="submit" value="register" id="register" onclick="rtc.register(getVal('id'))">
+          Reg
+        </button>
+            </div>
+        </div>
+    </div>
+    <div class='sw_capture'>
+        <label class="switch">
+        <input id="sw_capture" type="checkbox" checked onchange="ckb_capture()">
+        <span class="slider"></span>
+      </label><br>
+        <label id='lab_sw'>Display</label>
+    </div>
+    <script>
+        var checkbox = document.querySelector('#sw_capture');
+        var lab_sw = document.querySelector('#lab_sw');
+
+        function ckb_capture() {
+            if (checkbox.checked) {
+                videoOutput.style.display = 'block';
+                lab_sw.innerHTML = 'Display On';
+            } else {
+                videoOutput.style.display = 'none';
+                lab_sw.innerHTML = 'Display Off';
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript">
+        function getVal(id) {
+            return document.getElementById(id).value;
+        }
+    </script>
+</body>
+
+</html>

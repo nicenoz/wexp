@@ -1,0 +1,31 @@
+<!-- 메인 index.html
+>>  이 곳은 UA를 구분하여 장비, WebBrowser를
+>>  구분짖고, 알맞게 포팅하는 역할을 합니다.
+-->
+  <script type="text/javascript">
+  // location.href="1.html";
+  var ua = navigator.userAgent;
+  var DeviceID = "";
+  var BrowserID = "";
+
+  //ANDROID
+  if (ua.match(/Android/i)) {
+    DeviceID = "Android";
+    if (ua.indexOf('Chrome') > 0) location.href="index_server.html";
+    else if (ua.indexOf('Firefox') > 0) location.href="index_client.html";
+  }
+  //IOS
+  else if (ua.match(/iPhone|iPad|iPod/i)) {
+    DeviceID = "IOS";
+    if (ua.indexOf('Firefox') > 0) alert("Not supported IOS.");
+    else if (ua.indexOf('Safari') > 0) alert("Not supported IOS.");
+  }
+  //PC
+  else if(ua.match(/Windows/i)){
+    DeviceID = "PC";
+    if (ua.indexOf('MSIE') > 0 || ua.indexOf('Trident') > 0) alert("Not supported IE.");
+    else if (ua.indexOf('Opera') > 0 || ua.indexOf('OPR') > 0) alert("Not supported Opera.");
+    else if (ua.indexOf('Firefox') > 0) location.href="index_client.html";
+    else if (ua.indexOf('Chrome') > 0) location.href="index_server.html";
+  }
+  </script>

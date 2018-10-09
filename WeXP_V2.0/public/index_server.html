@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>XpertViewerServer_V3</title>
+    <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- CSS -->
+    <style type="text/css">
+        @font-face {
+            font-family: testFont;
+            src: url(https://static1.squarespace.com/static/581ada65e58c62432be8b9a4/t/5852fb762e69cf4dafae0950/1481833335189/FontFont+-+MarkOT-Thin.otf) format("opentype");
+        }
+
+        .top_lay {
+            width: 960px;
+            height: 42px;
+            margin: auto;
+            border-style: solid;
+            border-color: silver;
+            border-width: 1px;
+        }
+
+        .main_lay {
+            background-color: #F6F6F6;
+            width: 960px;
+            height: 580px;
+            margin: auto;
+        }
+
+        .btn-hover {
+            font-weight: normal;
+            color: #333333;
+            cursor: pointer;
+            background-color: inherit;
+            border-color: transparent;
+        }
+
+        .btn-hover-alt {
+            font-weight: normal;
+            color: #ffffff;
+            cursor: pointer;
+            background-color: inherit;
+            border-color: transparent;
+        }
+        .slider-wrapper input {
+          width: 50px;
+          height: 10px;
+          margin: 0;
+          /* transform-origin: 75px 75px; */
+          transform: rotate(-90deg);
+        }
+
+        #top_logo {
+            float: left;
+        }
+
+        #inputgroup {
+            width: 300px;
+            height: 32px;
+            float: left;
+            top: 5px;
+            left: 150px;
+            position: relative;
+        }
+
+        #top_menu {
+            width: 200px;
+            height: 32px;
+            float: right;
+            top: 5px;
+            position: relative;
+            background-color: #FFFFFF;
+            font-size: 14px;
+            font-family: testFont;
+            font-style: italic;
+            text-align: center;
+            display: table-cell;
+            vertical-align: bottom;
+        }
+
+        #left-side {
+            width: 300px;
+            height: 580px;
+            float: left;
+            background-color: #F0F0F0;
+        }
+
+        #main_video {
+            width: 650px;
+            height: 580px;
+            float: right;
+            text-align: center;
+        }
+
+        #videoOutput {}
+
+        #text_msg {
+            width: 300px;
+            text-align: center;
+            opacity: 50%;
+        }
+
+        #msg_send {
+            width: 300px;
+        }
+
+        #one {
+            border-style: solid;
+            border-width: 1px;
+            border-color: silver;
+            position: relative;
+            z-index: 0;
+        }
+
+        /* canvas + tool */
+
+        #tool {
+            position: absolute;
+            top: 0px;
+            left: 86%;
+            z-index: 1;
+        }
+
+        #btn_canvL {
+            position: absolute;
+            top: 0px;
+            left: 0;
+            background-color: rgb(235, 235, 235);
+            display: none;
+            width: 48px;
+            height: 280px;
+            z-index: 0;
+        }
+
+        #btn_canvR {
+            position: absolute;
+            top: 0px;
+            left: 41px;
+            background-color: rgb(235, 235, 235);
+            display: none;
+            width: 48px;
+            height: 280px;
+            z-index: 0;
+        }
+
+        #btn_canv_send {
+            width: 78px;
+            height: 25px;
+            float: right;
+            background-color: #F0F0F0;
+            border: 0;
+            z-index: 0;
+        }
+
+        #dataChannelReceive {
+            height: 180px;
+            width: 300px;
+            resize: none;
+        }
+
+        #videoOutput {
+            border-style: solid;
+            border-width: 1px;
+            border-color: silver;
+        }
+    </style>
+</head>
+
+
+<body style="overflow: hidden" onload="init();">
+
+    <!-- 상단 -->
+    <div class="top_lay">
+
+        <!-- 로고 -->
+        <div id="top_logo">
+            <a href="https://localhost:5454"><img width="140%" src="./img/xpertviewer.png" ></a>
+        </div>
+
+        <!-- 계정 -->
+        <div class='input-group' id='inputgroup'>
+            <input type="text" class="form-control input-sm" name="id" id="id" maxlength=5 size=5 placeholder="ID" />
+            <div class="input-group-btn">
+                <button class="btn btn-info btn-sm" type="submit" value="register" id="register" onclick="rtc.register(getVal('id'))">
+                Reg
+              </button>
+            </div>
+            <input type="text" class="form-control input-sm" name="callee" id="callee" maxlength=5 size=5 placeholder="Call to" />
+            <div class="input-group-btn">
+                <button class="btn btn-info btn-sm" type="submit" value="call" id="call" onclick="rtc.call(getVal('callee'), getVal('id'))">
+                Call
+              </button>
+            </div>
+            <span class="label label-primary pull-right" id="call-state"></span>
+        </div>
+
+        <!-- 상단메뉴 -->
+        <div id="top_menu">
+            <b><a href="#">About</a>&emsp;
+                <!-- <a href="#">Logout</a>&emsp; -->
+                <a href="#">Contact</a>
+            </b>
+        </div>
+    </div>
+
+    <!-- 메인화면 -->
+    <div class="main_lay" id="main_div">
+
+        <!-- 왼쪽화면 -->
+        <div id='left-side'>
+            <img width="300px" height="23" src="./img/caller.png"><br>
+            <video id="videoInput" autoplay width="300px" height="210px" poster="./img/CamOff.png" style="border-style: solid;border-width: 1px; border-color: silver;"></video><br>
+
+            <!-- 채팅 -->
+            <div id='text_msg'>
+                <textarea id="dataChannelReceive" class="form-control" rows=3 cols=100 readonly></textarea>
+                <div class='input-group' id='msg_send'>
+                    <input type="text" id="dataChannelSend" name="dataChannelSend" class="form-control input-sm" placeholder="Type messages" autofocus/>
+                    <div class="input-group-btn">
+                        <button class="btn btn-default btn-sm" type="submit" id="btn_send">
+                Send
+              </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 도형 컨트롤 -->
+            <div id="shapes_ctl"> </div>
+
+            <!-- 왼쪽 하단 접속자이미지 -->
+            <img width="300px" height="125" src="./img/member.png"><br>
+        </div>
+
+        <!-- 메인 비디오화면 -->
+        <div id="main_video">
+            <div id='two'>
+                <video id="videoOutput" width="650px" height="290px" poster="./img/CamOff.png" autoplay></video>
+            </div>
+
+            <!-- 캔버스 -->
+            <div id='one'>
+                <!-- <div id="paint" > -->
+
+                <!-- 캔버스버튼 -->
+                <div id="tool">
+
+                    <section id="btn_canvL">
+                        <button id="btn_undo" type="submit" class="btn btn-md btn-hover btn-info" onclick="undo()" value="undo">
+                            <img width="20px" height="20px" src="./img/undo.png"/>
+                        </button><br>
+                        <button id="btn_pen" type="submit" class="btn btn-md btn-hover btn-info" onclick="d_pen()" value="pen">
+                            <img id="img_pen" width="20px" height="20px" src="./img/pen.png"/>
+                        </button><br>
+                        <button id="btn_circle" type="submit" class="btn btn-md btn-hover btn-info" onclick="d_circle()" value="circle">
+                            <img width="20px" height="20px" src="./img/circle.png"/>
+                          </button><br>
+                        <button id="btn_rect" type="submit" class="btn btn-md btn-hover btn-info" onclick="d_rect()" value="rect">
+                            <img width="20px" height="20px" src="./img/rect.png"/>
+                          </button><br>
+                        <button id="btn_text" type="submit" class="btn btn-md btn-hover btn-info" onclick="d_text()" value="text">
+                            <img width="20px" height="20px" src="./img/text.png"/>
+                          </button><br>
+                        <button id="btn_capture" type="submit" class="btn btn-md btn-hover btn-info" onclick="capture()" value="capture">
+                            <img width="20px" height="20px" src="./img/capture.png"/>
+                        </button><br>
+                        <label for="btn_loadimg">
+                            <img width="20px" height="20px" src="./img/imgfile.png"/>
+                        </label>
+                        <input id="btn_loadimg" type="file" class="btn btn-md btn-hover btn-info" style="cursor: pointer;  display: none" />
+
+                        <button id="btn_do" type="submit" class="btn btn-md btn-hover btn-info" value="capture">
+                        <img width="20px" height="20px" src="./img/prev.png"/>
+                    </button><br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+                    </section>
+                    <section id="btn_canvR">
+                        <button id="btn_redo" type="submit" class="btn btn-md btn-hover btn-info" onclick="redo()" value="redo">
+                            <img width="20px" height="20px" src="./img/redo.png"/>
+                        </button><br>
+
+                        <input type="color" width="20px" height="20px" value="#005E7A" id="drawing-color" readonly/>
+                        <br><br>
+                        <input type="text" size="1px" id="t_width" value="10" style="text-align:center; border-width:0px" disabled>
+                        <div class="slider-wrapper">
+                            <br>
+                            <input type="range"  value="10" min="0" max="40" id="d_width" data-show-value="true">
+                        </div><br><br>
+                        <button id="btn_fixpic" type="submit" class="btn btn-md btn-hover btn-info" onclick="fixpic()" value="clear">
+                            <img width="20px" height="20px" src="./img/fixpic.png"/>
+                        </button><br>
+                        <button id="btn_clear" type="submit" class="btn btn-md btn-hover btn-info" onclick="clearall()" value="clear">
+                            <img width="20px" height="20px" src="./img/clear.png"/>
+                        </button><br>
+                        <button id="btn_do" type="submit" class="btn btn-md btn-hover btn-info" value="capture">
+                            <img width="20px" height="20px" src="./img/next.png"/>
+                          </button><br>
+                    </section>
+                </div>
+                <!-- </div> -->
+                <canvas id="c" width="550px" height="280px">
+
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+
+    <!-- <script type="text/javascript" src="./js/fabric.js-2.0.0-rc.4/dist/fabric.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.11/fabric.min.js"></script>
+    <script type="text/javascript">
+        function getVal(id) {
+            return document.getElementById(id).value;
+        }
+        var canvasEdit = document.getElementById('one');
+        canvasEdit.addEventListener('mouseover', function(e){
+            var x = document.getElementById("btn_canvL");
+                x.style.display = "block";
+            var y = document.getElementById("btn_canvR");
+                y.style.display = "block";
+        });
+        canvasEdit.addEventListener('mouseleave', function(e){
+            var x = document.getElementById("btn_canvL");
+                x.style.display = "none";
+            var y = document.getElementById("btn_canvR");
+                y.style.display = "none";
+        });
+
+        /////////////////////////////canvas tool.///////////////////////////
+        var canvas_o = document.querySelector('canvas');
+        var canvas = new fabric.Canvas(canvas_o, {
+                // backgroundColor: 'rgb(250,250,250)',
+                selectionBorderColor: 'skyblue',
+                selectionColor: 'transparent',
+                selectionLineWidth: 1,
+                selection: true,
+                controlsAboveOverlay: true,
+                centeredScaling: true
+            });
+        var d_color=document.getElementById('drawing-color').value;
+        var d_size='10';
+        canvas.freeDrawingBrush.color = document.getElementById('drawing-color').value;
+        canvas.freeDrawingBrush.width = parseInt(document.getElementById('d_width').value, 10) || 1;
+
+
+        document.addEventListener('keydown', (event) => {
+            if(event.key == 'Delete'|| event.keyCode==46){
+                canvas.isDrawingMode = false;
+                deleteObjects();
+            }
+        });
+
+        function deleteObjects(){
+            if(canvas.getActiveGroup()){
+                canvas.getActiveGroup().forEachObject(function(o){ canvas.remove(o) });
+                canvas.discardActiveGroup().renderAll();
+            }
+            else {
+                canvas.remove(canvas.getActiveObject());
+            }
+        }
+        function clearall() {
+            console.log('clear');
+            canvas.clear().renderAll();
+        }
+
+        ///////////////////////////////////////////////////////////
+        var state = [];
+        var mods = 0;
+        canvas.on(
+            'object:modified', function () {
+            updateModifications(true);
+        },
+            'object:added', function () {
+            updateModifications(true);
+        });
+
+        function updateModifications(savehistory) {
+            if (savehistory === true) {
+                myjson = JSON.stringify(canvas);
+                state.push(myjson);
+            }
+        }
+
+        undo = function undo() {
+            if (mods < state.length) {
+                canvas.clear().renderAll();
+                canvas.loadFromJSON(state[state.length - 1 - mods - 1]);
+                canvas.renderAll();
+                mods += 1;
+            }
+        }
+
+        redo = function redo() {
+            if (mods > 0) {
+                canvas.clear().renderAll();
+                canvas.loadFromJSON(state[state.length - 1 - mods + 1]);
+                canvas.renderAll();
+                mods -= 1;
+            }
+        }
+        ///////////////////////////////////////////////////////////
+
+        function d_pen(){
+            var btn = document.getElementById('img_pen');
+            if(canvas.isDrawingMode){
+                btn.src = "./img/editmode.png";
+                canvas.isDrawingMode = false;
+                canvas.freeDrawingBrush.color = document.getElementById('drawing-color').value;
+                canvas.freeDrawingBrush.width = parseInt(document.getElementById('d_width').value, 10) || 1;
+            }
+            else{
+                btn.src = "./img/pen.png";
+                canvas.isDrawingMode = true;
+
+            }
+        }
+
+        function d_rect() {
+            var object = new fabric.Rect({
+                width: 50,
+                height: 50,
+                fill: 'transparent',
+                stroke: d_color,
+                strokeWidth: parseInt(document.getElementById('d_width').value, 10) || 1,
+                opacity: 1,
+                left: canvas.width/2,
+                top: canvas.height/2
+            });
+            canvas.add(object);
+            canvas.isDrawingMode = false;
+        }
+
+        function d_circle(){
+            var object = new fabric.Circle({
+                radius: 25,
+                fill: 'transparent',
+                stroke: d_color,
+                strokeWidth: parseInt(document.getElementById('d_width').value, 10) || 1,
+                opacity: 1,
+                left: canvas.width/2,
+                top: canvas.height/2
+            });
+            // object.setColor('black');
+            canvas.add(object);
+            canvas.isDrawingMode = false;
+        }
+
+        function d_text(){
+            var object = new fabric.Textbox("A");
+            object.set({
+              width: 100,
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: parseInt(document.getElementById('d_width').value, 10) || 1,
+            });
+            object.setColor(d_color);
+            canvas.add(object);
+            canvas.isDrawingMode = false;
+        }
+
+        function fixpic(){
+            var img = new Image(100,100);
+            img.src = './img/fixpic.png';
+            var imgobject = new fabric.Image(img, {
+                left: 0,
+                top: 0,
+                width: d_size*10,
+                height: d_size*10,
+                selectable: true,
+                frame: false,
+                color: 'red'
+            });
+            canvas.add(imgobject);
+        }
+
+        function capture(){
+            var canvas2 = document.createElement('canvas');
+            canvas2.width  = videoOutput.width;
+            canvas2.height = videoOutput.height;
+            var ctx2 = canvas2.getContext('2d');
+                ctx2.drawImage(videoOutput, 0, 0, videoOutput.width, videoOutput.height);
+                canvas2.toDataURL('image/jpeg');
+
+            var imgInstance = new fabric.Image(canvas2, {
+                left: 0,
+                top: 0,
+                width: canvas.width,
+                height: canvas.height,
+                selectable: false,
+                frame: false
+            });
+            canvas.add(imgInstance);
+            canvas.isDrawingMode = false;
+            canvas.selection = true;
+        }
+        document.getElementById('drawing-color').addEventListener("change", function(e){
+            d_color = e.target.value;
+             canvas.freeDrawingBrush.color = d_color;
+        });
+        document.getElementById('btn_loadimg').addEventListener("change", function(e){
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (f) {
+                var data = f.target.result;
+                fabric.Image.fromURL(data, function (img) {
+                    var oImg = img.set({left: 0, top: 0, angle: 0,width:100, height:100}).scale(0.9);
+                    canvas.add(oImg).renderAll();
+                    var a = canvas.setActiveObject(oImg);
+                    var dataURL = canvas.toDataURL({format: 'png', quality: 0.8});
+                });
+            };
+            reader.readAsDataURL(file);
+            canvas.isDrawingMode = false;
+        });
+
+        document.getElementById('d_width').addEventListener("change", function(e){
+            document.getElementById('t_width').value = e.target.value;
+            d_size = e.target.value;
+            canvas.freeDrawingBrush.color = document.getElementById('drawing-color').value;
+            canvas.freeDrawingBrush.width = parseInt(document.getElementById('d_width').value, 10) || 1;
+        });
+    </script>
+</body>
+</html>
