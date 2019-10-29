@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "uglify-js": "3.1.x",
-    "eslint": "4.7.x",
+    "eslint": "6.6.x",
     "qunit": "1.x.x",
     "istanbul": "0.4.x",
     "onchange": "^3.x.x"
