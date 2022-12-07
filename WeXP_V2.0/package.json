@@ -9,7 +9,7 @@
   "author": "Yaraslau Kurmyza <lotask@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.4",
+    "express": "^4.17.3",
     "express-http-to-https": "^1.1.2",
     "fs": "0.0.1-security",
     "ws": "^1.1.5"
